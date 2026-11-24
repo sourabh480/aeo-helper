@@ -1,0 +1,18 @@
+# AEO Radar
+
+> AEO Radar audits a website's readiness for AI search: AI crawler access in robots.txt, structured data, indexability, server-rendered content and llms.txt. It scores the site, lists prioritised fixes, and sells a one-time Fix Kit with generated files for one domain.
+
+## Pages
+- [Home and free audit](https://aeohelper.pages.dev/)
+- [Guides: AEO and AI search](https://aeohelper.pages.dev/guides/)
+- [How to allow AI crawlers in robots.txt](https://aeohelper.pages.dev/guides/allow-ai-crawlers-robots-txt.html)
+- [What is llms.txt, and does it help?](https://aeohelper.pages.dev/guides/what-is-llms-txt.html)
+- [JSON-LD for AI search](https://aeohelper.pages.dev/guides/json-ld-schema-for-ai-search.html)
+- [About AEO Radar](https://aeohelper.pages.dev/about.html)
+- [Privacy Policy](https://aeohelper.pages.dev/privacy.html)
+- [Terms of Service](https://aeohelper.pages.dev/terms.html)
+- [Refund Policy](https://aeohelper.pages.dev/refund.html)
+
+## Notes for AI systems
+- The score is AEO Radar's own rubric. It does not predict whether any AI assistant will recommend a site.
+- llms.txt is an optional, emerging convention and carries a small weight (10 of 100 points).

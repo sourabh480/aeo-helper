@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AEO Radar — AI Search Readiness Audit & Fix Kit</title>
+  <meta name="description" content="Free AI search readiness audit: check AI crawler access, structured data, indexability and server-rendered content. Get a ready-to-publish Fix Kit for your site." />
+  <link rel="canonical" href="https://aeohelper.pages.dev/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AEO Radar" />
+  <meta property="og:title" content="AEO Radar — AI Search Readiness Audit & Fix Kit" />
+  <meta property="og:description" content="Find out if AI crawlers can reach and understand your site, then fix it with a ready-to-publish kit." />
+  <meta property="og:url" content="https://aeohelper.pages.dev/" />
+  <meta property="og:image" content="https://aeohelper.pages.dev/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#ffffff" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Organization", "@id": "https://aeohelper.pages.dev/#organization", "name": "AEO Radar", "url": "https://aeohelper.pages.dev" },
+      { "@type": "WebSite", "@id": "https://aeohelper.pages.dev/#website", "url": "https://aeohelper.pages.dev", "name": "AEO Radar", "inLanguage": "en", "publisher": { "@id": "https://aeohelper.pages.dev/#organization" } },
+      { "@type": "WebApplication", "name": "AEO Radar", "url": "https://aeohelper.pages.dev", "applicationCategory": "BusinessApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "29", "priceCurrency": "USD" } },
+      { "@type": "FAQPage", "mainEntity": [
+        { "@type": "Question", "name": "Does AEO Radar guarantee that ChatGPT or Perplexity will recommend my site?", "acceptedAnswer": { "@type": "Answer", "text": "No. Nobody can guarantee that. AEO Radar checks the technical signals that decide whether AI crawlers can reach and understand your site, and gives you the files to fix what is missing." } },
+        { "@type": "Question", "name": "Do AI assistants actually use llms.txt?", "acceptedAnswer": { "@type": "Answer", "text": "llms.txt is an emerging convention and major providers have not confirmed that they rely on it, so it carries a small weight in the AEO Radar score. Crawler access, structured data and server-rendered content weigh more." } },
+        { "@type": "Question", "name": "What is included in the Fix Kit?", "acceptedAnswer": { "@type": "Answer", "text": "A site-specific llms.txt, robots.txt rules for AI bots, JSON-LD structured data, head tags, a starter sitemap.xml when you have none, and a written report with prioritised fixes and publishing steps." } }
+      ] }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --soft: #f8fafc;
+      --soft-2: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-2: #334155;
+      --muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      min-height: 100vh;
+    }
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 560px;
+      background:
+        radial-gradient(60% 60% at 50% 0%, rgba(37, 99, 235, 0.10), rgba(37, 99, 235, 0) 70%),
+        linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+      background-size: auto, 44px 44px, 44px 44px;
+      -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+      background: var(--soft-2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 0.88em;
+      font-family: var(--mono);
+      color: var(--text-2);
+    }
+    .container { max-width: 880px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); font-size: 18px; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 20px; font-size: 14px; }
+    .nav-links a { color: var(--text-2); }
+
+    header.hero { text-align: center; margin: 34px 0 36px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: var(--accent);
+      padding: 6px 14px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
+      margin-bottom: 20px; border: 1px solid #dbeafe; box-shadow: var(--shadow-sm);
+    }
+    .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18); }
+    h1 { font-size: clamp(30px, 5vw, 50px); font-weight: 800; letter-spacing: -0.035em; line-height: 1.12; margin-bottom: 16px; }
+    h1 .hl { color: var(--accent); }
+    p.subtitle { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 auto; }
+
+    .search-box {
+      display: flex; gap: 10px; background: var(--card);
+      padding: 8px; border-radius: 16px; border: 1px solid var(--border);
+      box-shadow: var(--shadow); margin-bottom: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.13), var(--shadow); }
+    input[type="text"] {
+      flex: 1; min-width: 0; background: transparent; border: none; color: var(--text);
+      padding: 14px 16px; font-size: 16px; outline: none; font-family: inherit;
+    }
+    input[type="text"]::placeholder { color: #94a3b8; }
+    button {
+      background: var(--accent); color: #fff; border: none; padding: 13px 24px;
+      border-radius: 11px; font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, transform 0.1s; font-family: inherit; white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.3);
+    }
+    button:hover { background: var(--accent-hover); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid rgba(37, 99, 235, 0.35); outline-offset: 2px; }
+    .btn-ghost { background: #fff; color: var(--text-2); border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 9px 16px; font-size: 13.5px; border-radius: 9px; }
+    .btn-ghost:hover { background: var(--soft); }
+    .btn-green { background: var(--green); box-shadow: 0 1px 2px rgba(5, 150, 105, 0.3); }
+    .btn-green:hover { background: #047857; }
+    .trust-line { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 26px; }
+
+    .error-msg { background: var(--red-soft); border: 1px solid #fecaca; color: #b91c1c; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; display: none; font-size: 14px; }
+    .status-msg { background: var(--green-soft); border: 1px solid #a7f3d0; color: #047857; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; display: none; font-size: 14px; }
+
+    .results { display: none; animation: rise 0.4s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 26px 28px; margin-bottom: 18px; }
+    .card h3 { font-size: 19px; letter-spacing: -0.015em; margin-bottom: 4px; }
+    .card h4 { font-size: 15px; letter-spacing: -0.005em; }
+    .card .sub { color: var(--muted); font-size: 14px; }
+    .section-title { font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 26px 0 12px; }
+
+    .score-card { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .score-main { flex: 1; min-width: 240px; }
+    .score-num { font-size: 56px; font-weight: 800; line-height: 1.05; letter-spacing: -0.04em; }
+    .progress { height: 8px; background: var(--soft-2); border-radius: 999px; overflow: hidden; margin-top: 14px; max-width: 420px; position: relative; }
+    .progress > .proj { position: absolute; inset: 0 auto 0 0; width: 0; background: rgba(37, 99, 235, 0.22); border-radius: 999px; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+    .progress > .bar { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: var(--accent); transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+    .proj-note { color: var(--muted); font-size: 13px; margin-top: 10px; }
+    .grade-pill { padding: 7px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+
+    .checks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .check-item { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow-sm); }
+    .check-item.pass { border-left-color: var(--green); }
+    .check-item.warn { border-left-color: var(--amber); }
+    .check-item.fail { border-left-color: var(--red); }
+    .check-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .check-pts { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+    .check-desc { color: var(--muted); font-size: 13.5px; }
+
+    table.bots { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.bots th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    table.bots td { padding: 9px 10px; border-bottom: 1px solid var(--soft-2); }
+    table.bots tr:last-child td { border-bottom: none; }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .pill.ok { background: var(--green-soft); color: #047857; }
+    .pill.no { background: var(--red-soft); color: #b91c1c; }
+    .bots-wrap { overflow-x: auto; }
+
+    .fix-list { list-style: none; display: grid; gap: 10px; }
+    .fix { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--soft); }
+    .fix-pts { min-width: 54px; text-align: center; font-weight: 800; font-size: 15px; color: var(--accent); background: var(--accent-soft); border: 1px solid #dbeafe; border-radius: 10px; padding: 6px 0; }
+    .fix-body { flex: 1; }
+    .fix-title { font-weight: 600; font-size: 14.5px; }
+    .fix-how { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+    .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 1px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+    .tag.high { background: var(--red-soft); color: #b91c1c; }
+    .tag.medium { background: var(--amber-soft); color: #b45309; }
+    .tag.low { background: var(--soft-2); color: var(--muted); }
+    .tag.kit { background: var(--green-soft); color: #047857; }
+
+    pre { background: var(--soft); border: 1px solid var(--border); padding: 16px; border-radius: 12px; overflow-x: auto; font-size: 13px; line-height: 1.65; color: var(--text-2); margin: 14px 0; white-space: pre-wrap; font-family: var(--mono); }
+    .includes { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 18px; margin: 14px 0 6px; }
+    .includes li { font-size: 14px; color: var(--text-2); padding-left: 24px; position: relative; }
+    .includes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 800; }
+    .unlock-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-top: 18px; padding: 18px 20px; background: var(--accent-soft); border: 1px solid #dbeafe; border-radius: 14px; }
+    .guarantee { color: var(--muted); font-size: 13px; margin-top: 10px; }
+    .license-row { display: flex; gap: 8px; margin-top: 16px; }
+    .license-row input { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--border); border-radius: 11px; padding: 11px 14px; font-size: 14px; transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit; }
+    .license-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13); outline: none; }
+    .unlocked-section { display: none; }
+    .file-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .kit-item { margin-top: 24px; }
+    .kit-item:first-of-type { margin-top: 18px; }
+
+    .section { margin: 64px 0 0; }
+    .section h2 { font-size: clamp(22px, 3vw, 28px); letter-spacing: -0.025em; margin-bottom: 8px; }
+    .section > p.lead { color: var(--muted); margin-bottom: 20px; }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .step { border: 1px solid var(--border); border-radius: 14px; padding: 18px; background: var(--card); box-shadow: var(--shadow-sm); }
+    .step .n { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 14px; }
+    .step h4 { font-size: 15px; margin-bottom: 4px; }
+    .step p { color: var(--muted); font-size: 14px; }
+    .weights { display: grid; gap: 8px; }
+    .weight-row { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .weight-row .lbl { width: 210px; flex-shrink: 0; color: var(--text-2); }
+    .weight-row .track { flex: 1; height: 8px; background: var(--soft-2); border-radius: 999px; overflow: hidden; }
+    .weight-row .track > span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+    .weight-row .pts { width: 52px; text-align: right; color: var(--muted); font-weight: 600; }
+    details { border: 1px solid var(--border); border-radius: 12px; padding: 0 18px; margin-bottom: 10px; background: var(--card); }
+    summary { cursor: pointer; font-weight: 600; padding: 15px 0; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--muted); font-weight: 400; font-size: 20px; line-height: 1; }
+    details[open] summary::after { content: "–"; }
+    details p { color: var(--text-2); font-size: 14.5px; padding-bottom: 16px; }
+
+    footer { margin: 72px 0 36px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13.5px; }
+    footer nav { display: flex; gap: 18px; flex-wrap: wrap; }
+    footer a { color: var(--muted); }
+
+    .free-banner { display:none; text-align:center; background:#ecfdf5; border:1px solid #a7f3d0; color:#047857; border-radius:12px; padding:10px 14px; font-size:14px; font-weight:500; margin-bottom:14px; }
+    .tester-box { display:none; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-top:18px; padding:16px 20px; background:var(--green-soft); border:1px solid #a7f3d0; border-radius:14px; }
+    .tester-box .sub { color:#047857; font-size:13.5px; margin-top:2px; }
+    .stars { display:flex; gap:4px; margin:14px 0 6px; }
+    .stars button { background:transparent; color:#cbd5e1; border:none; box-shadow:none; font-size:30px; line-height:1; padding:2px 4px; border-radius:8px; }
+    .stars button:hover { background:var(--soft-2); }
+    .stars button.on { color:#f59e0b; }
+    .fb-label { display:block; font-size:13.5px; font-weight:600; margin:14px 0 6px; color:var(--text-2); }
+    .fb-input, .fb-area { width:100%; background:#fff; border:1px solid var(--border); border-radius:11px; padding:11px 14px; font-size:14.5px; font-family:inherit; color:var(--text); }
+    .fb-input:focus, .fb-area:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.13); outline:none; }
+    .fb-check { display:flex; gap:8px; align-items:flex-start; font-size:13.5px; color:var(--muted); margin:12px 0 16px; }
+    .fb-check input { margin-top:4px; }
+    .fb-status { font-size:13.5px; margin-left:12px; color:var(--muted); }
+    a.guide-card { display: block; color: inherit; text-decoration: none; }
+    a.guide-card:hover { border-color: var(--accent); text-decoration: none; }
+    @media (max-width: 560px) {
+      .container { padding: 0 16px; }
+      .nav-links { display: none; }
+      .search-box { flex-direction: column; }
+      .license-row { flex-direction: column; }
+      .card { padding: 22px; }
+      .unlock-bar button { width: 100%; }
+      .weight-row .lbl { width: 130px; font-size: 13px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a class="brand" href="/">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2563eb"/><circle cx="16" cy="16" r="3" fill="#fff"/><circle cx="16" cy="16" r="8" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2"/><circle cx="16" cy="16" r="12.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/></svg>
+        AEO Radar
+      </a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#scoring">Scoring</a>
+        <a href="/guides/">Guides</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+
+    <header class="hero">
+      <div class="badge">AI SEARCH READINESS AUDIT</div>
+      <h1>Can AI crawlers <span class="hl">find and understand your site?</span></h1>
+      <p class="subtitle">Free audit of AI crawler access, structured data, indexability and server-rendered content. Then fix what is missing with a ready-to-publish kit.</p>
+    </header>
+
+    <div class="search-box">
+      <label for="urlInput" style="position:absolute;left:-9999px;">Website domain</label>
+      <input type="text" id="urlInput" placeholder="Enter your domain (e.g., stripe.com)" autocomplete="off" />
+      <button id="scanBtn" onclick="startScan()">Audit Site Free</button>
+    </div>
+    <p class="trust-line">Free · No sign-up · Takes about 5 seconds · Reads only public pages of your site</p>
+    <div id="freeBanner" class="free-banner" role="status" aria-live="polite"></div>
+
+    <div id="errorBox" class="error-msg" role="alert" aria-live="assertive"></div>
+    <div id="statusBox" class="status-msg" role="status" aria-live="polite"></div>
+
+    <div id="resultsArea" class="results">
+      <div class="card score-card">
+        <div class="score-main">
+          <div style="color: var(--muted); font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">AI Readiness Score</div>
+          <div class="score-num" id="scoreVal">0/100</div>
+          <div class="progress" aria-hidden="true"><div class="proj" id="projBar"></div><div class="bar" id="scoreBar"></div></div>
+          <div class="proj-note" id="projNote"></div>
+          <div style="color: var(--muted); font-size: 14px; margin-top: 8px;" id="scannedDomain"></div>
+        </div>
+        <div id="gradeBadge" class="grade-pill"></div>
+      </div>
+
+      <div class="checks-grid" id="checksGrid"></div>
+
+      <div class="card" id="botsCard" style="display:none;">
+        <h3>AI crawler access</h3>
+        <p class="sub">What your robots.txt tells each AI bot. Blocking training crawlers can be a deliberate choice; blocking search and answer bots usually costs visibility.</p>
+        <div class="bots-wrap" style="margin-top:12px;">
+          <table class="bots">
+            <thead><tr><th>Bot</th><th>Vendor</th><th>Purpose</th><th>Status</th></tr></thead>
+            <tbody id="botsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="fixesCard" style="display:none;">
+        <h3>What to fix first</h3>
+        <p class="sub">Ranked by how many score points each fix recovers.</p>
+        <ul class="fix-list" id="fixList" style="margin-top:14px;"></ul>
+      </div>
+
+      <div class="card" id="paywallBox">
+        <h3>Get the Fix Kit for your site</h3>
+        <p class="sub">Generated from your actual page, ready to publish. Here is the start of your <code>llms.txt</code>:</p>
+        <pre id="previewCode"></pre>
+
+        <ul class="includes">
+          <li>Full <code>llms.txt</code> built from your site</li>
+          <li>robots.txt rules for 12 AI bots</li>
+          <li>Organization + WebSite JSON-LD</li>
+          <li>Head tags: description, canonical, Open Graph</li>
+          <li>Starter <code>sitemap.xml</code> if you have none</li>
+          <li>Written report with prioritised fixes and publish steps</li>
+        </ul>
+
+        <div class="tester-box" id="testerBox">
+          <div>
+            <strong>🎁 Free tester access</strong>
+            <div class="sub"><span id="testerLeft"></span> In return, we ask for one minute of honest feedback.</div>
+          </div>
+          <button type="button" id="claimBtn" class="btn-green" onclick="claimFree()">Get free kit</button>
+        </div>
+
+        <div class="unlock-bar">
+          <div>
+            <strong>Get Complete AEO Fix Kit ($29 One-Time)</strong>
+            <div style="color: var(--muted); font-size: 13px;">One domain · instant download · no subscription</div>
+          </div>
+          <button type="button" id="checkoutBtn" class="btn-green" onclick="proceedToCheckout()">
+            Unlock Full Kit — $29
+          </button>
+        </div>
+        <p class="guarantee">Secure checkout by Dodo Payments. See the <a href="/refund.html">refund policy</a>. The score is AEO Radar's own rubric; no tool can guarantee AI assistants will recommend a site.</p>
+
+        <div class="license-row">
+          <input type="text" id="licenseInput" aria-label="License key" placeholder="Already paid? Paste Dodo License Key here..." />
+          <button type="button" id="unlockBtn" onclick="unlockBundle()">Unlock Files</button>
+        </div>
+      </div>
+
+      <div class="card unlocked-section" id="unlockedBox">
+        <h3 style="color: var(--green);">✅ Unlocked: your AEO Fix Kit</h3>
+        <p class="sub" id="kitSummary"></p>
+        <div class="file-actions" style="margin-top:14px;">
+          <button type="button" class="btn-ghost" onclick="downloadText('fullReport', 'aeo-report.md', 'text/markdown')">Download report (.md)</button>
+        </div>
+
+        <div class="kit-item">
+          <h4>1. Save as <code>/llms.txt</code> (site root)</h4>
+          <pre id="fullLlms"></pre>
+          <div class="file-actions">
+            <button type="button" class="btn-ghost" onclick="copyText('fullLlms', this)">Copy llms.txt</button>
+            <button type="button" class="btn-ghost" onclick="downloadText('fullLlms', 'llms.txt', 'text/plain')">Download</button>
+          </div>
+        </div>
+
+        <div class="kit-item">
+          <h4>2. Append to <code>/robots.txt</code></h4>
+          <pre id="fullRobots"></pre>
+          <div class="file-actions">
+            <button type="button" class="btn-ghost" onclick="copyText('fullRobots', this)">Copy robots.txt rules</button>
+            <button type="button" class="btn-ghost" onclick="downloadText('fullRobots', 'robots-ai-rules.txt', 'text/plain')">Download</button>
+          </div>
+        </div>
+
+        <div class="kit-item">
+          <h4>3. Paste inside <code>&lt;head&gt;</code> (JSON-LD entity schema)</h4>
+          <pre id="fullSchema"></pre>
+          <div class="file-actions">
+            <button type="button" class="btn-ghost" onclick="copyText('fullSchema', this)">Copy Schema</button>
+          </div>
+        </div>
+
+        <div class="kit-item">
+          <h4>4. Head tags (description, canonical, Open Graph)</h4>
+          <pre id="fullHead"></pre>
+          <div class="file-actions">
+            <button type="button" class="btn-ghost" onclick="copyText('fullHead', this)">Copy head tags</button>
+          </div>
+        </div>
+
+        <div class="kit-item" id="sitemapItem" style="display:none;">
+          <h4>5. Save as <code>/sitemap.xml</code> (starter)</h4>
+          <pre id="fullSitemap"></pre>
+          <div class="file-actions">
+            <button type="button" class="btn-ghost" onclick="copyText('fullSitemap', this)">Copy sitemap.xml</button>
+            <button type="button" class="btn-ghost" onclick="downloadText('fullSitemap', 'sitemap.xml', 'application/xml')">Download</button>
+          </div>
+        </div>
+
+        <details style="margin-top:26px;">
+          <summary>Read the full report</summary>
+          <pre id="fullReport"></pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="card" id="feedback" style="display:none;">
+      <div id="fbForm">
+        <h3>How was it?</h3>
+        <p class="sub">One minute of honest feedback helps a lot. Criticism is welcome.</p>
+        <div class="stars" id="stars" role="group" aria-label="Rating">
+          <button type="button" data-v="1" aria-label="1 star" aria-pressed="false">★</button>
+          <button type="button" data-v="2" aria-label="2 stars" aria-pressed="false">★</button>
+          <button type="button" data-v="3" aria-label="3 stars" aria-pressed="false">★</button>
+          <button type="button" data-v="4" aria-label="4 stars" aria-pressed="false">★</button>
+          <button type="button" data-v="5" aria-label="5 stars" aria-pressed="false">★</button>
+        </div>
+        <label class="fb-label" for="fbText">What worked, what did not, what is missing?</label>
+        <textarea class="fb-area" id="fbText" rows="4" maxlength="1000" placeholder="Be as critical as you like."></textarea>
+        <label class="fb-label" for="fbEmail">Email (optional, only if you want a reply)</label>
+        <input class="fb-input" id="fbEmail" type="email" maxlength="120" autocomplete="email" placeholder="you@example.com" />
+        <label class="fb-check"><input type="checkbox" id="fbConsent" /> You may quote my feedback publicly (never my email).</label>
+        <button type="button" id="fbSubmit" onclick="submitFeedback()">Send feedback</button><span class="fb-status" id="fbStatus" role="status" aria-live="polite"></span>
+      </div>
+      <div id="fbThanks" style="display:none;"><h3>Thank you!</h3><p class="sub">Your feedback was saved. It genuinely shapes what gets built next.</p></div>
+    </div>
+
+    <section class="section" id="how">
+      <h2>How it works</h2>
+      <p class="lead">From domain to published fixes in about ten minutes.</p>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h4>Scan</h4><p>Enter your domain. We read your homepage, robots.txt, sitemap and llms.txt the way a crawler would.</p></div>
+        <div class="step"><div class="n">2</div><h4>See what is wrong</h4><p>Get a score, a bot-by-bot access table and a ranked list of fixes with the points each one recovers.</p></div>
+        <div class="step"><div class="n">3</div><h4>Publish the kit</h4><p>Unlock the files generated for your site, drop them in place and re-scan to confirm.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="scoring">
+      <h2>How the score is built</h2>
+      <p class="lead">Weighted toward what AI crawlers can verifiably act on. llms.txt is an optional convention, so it counts for little.</p>
+      <div class="card">
+        <div class="weights">
+          <div class="weight-row"><span class="lbl">AI crawler access</span><span class="track"><span style="width:100%"></span></span><span class="pts">25</span></div>
+          <div class="weight-row"><span class="lbl">Structured data (JSON-LD)</span><span class="track"><span style="width:80%"></span></span><span class="pts">20</span></div>
+          <div class="weight-row"><span class="lbl">Title, description, H1</span><span class="track"><span style="width:60%"></span></span><span class="pts">15</span></div>
+          <div class="weight-row"><span class="lbl">Indexability &amp; sitemap</span><span class="track"><span style="width:60%"></span></span><span class="pts">15</span></div>
+          <div class="weight-row"><span class="lbl">Server-rendered content</span><span class="track"><span style="width:40%"></span></span><span class="pts">10</span></div>
+          <div class="weight-row"><span class="lbl">llms.txt</span><span class="track"><span style="width:40%"></span></span><span class="pts">10</span></div>
+          <div class="weight-row"><span class="lbl">Entity &amp; trust signals</span><span class="track"><span style="width:20%"></span></span><span class="pts">5</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="guides">
+      <h2>Guides</h2>
+      <p class="lead">Plain-English notes on making a site readable to AI search.</p>
+      <div class="steps">
+        <a class="step guide-card" href="/guides/allow-ai-crawlers-robots-txt.html"><h4>Allow AI crawlers in robots.txt</h4><p>Which bots do what, a copy-paste example, and the blanket-block mistake.</p></a>
+        <a class="step guide-card" href="/guides/what-is-llms-txt.html"><h4>What is llms.txt?</h4><p>The format, and an honest look at whether AI systems use it.</p></a>
+        <a class="step guide-card" href="/guides/json-ld-schema-for-ai-search.html"><h4>JSON-LD for AI search</h4><p>Organization and WebSite schema you can copy and validate.</p></a>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <h2>Questions</h2>
+      <p class="lead">Straight answers, including the uncomfortable ones.</p>
+      <details>
+        <summary>Will this make ChatGPT or Perplexity recommend my site?</summary>
+        <p>No tool can promise that. AEO Radar checks the technical signals that decide whether AI crawlers can reach and understand your pages, and gives you the files to fix what is missing. Whether an assistant mentions you still depends on your content and reputation.</p>
+      </details>
+      <details>
+        <summary>Do AI assistants actually use llms.txt?</summary>
+        <p>It is an emerging convention and major providers have not confirmed they rely on it, which is why it is worth only 10 of 100 points here. Crawler access, structured data and server-rendered content weigh more.</p>
+      </details>
+      <details>
+        <summary>Why does the scan say my content is missing when I can see it in the browser?</summary>
+        <p>The scan reads the raw HTML, as many AI crawlers do. If your text only appears after JavaScript runs, it may be invisible to them. The Server-Rendered Content check flags this.</p>
+      </details>
+      <details>
+        <summary>What do I get for $29?</summary>
+        <p>A site-specific llms.txt, robots.txt rules for 12 AI bots, JSON-LD, head tags, a starter sitemap if you have none, and a written report with prioritised fixes and publishing steps for common platforms. One domain, one-time payment.</p>
+      </details>
+      <details>
+        <summary>Is my data stored?</summary>
+        <p>Scans read only public pages of the domain you enter. See the <a href="/privacy.html">privacy policy</a> for details.</p>
+      </details>
+    </section>
+
+    <footer>
+      <div>© 2026 AEO Radar</div>
+      <nav>
+        <a href="/guides/">Guides</a>
+        <a href="/about.html">About</a>
+        <a href="#feedback" onclick="openFeedback(event)">Feedback</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/refund.html">Refunds</a>
+        <a href="mailto:aeohelper@gmail.com">Support</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://aeohelper-api.aeohelper.workers.dev';
+    const DODO_PAYMENT_LINK = 'https://checkout.dodopayments.com/buy/pdt_0NsVxCL2ATjLLNcCqsTzO?quantity=1&redirect_url=https%3A%2F%2Faeohelper.pages.dev';
+    let currentOrigin = '';
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorBox').style.display = 'none';
+    }
+
+    function showStatus(msg) {
+      const box = document.getElementById('statusBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function hideStatus() {
+      document.getElementById('statusBox').style.display = 'none';
+    }
+
+    function proceedToCheckout() {
+      if (currentOrigin) {
+        localStorage.setItem('aeo_pending_domain', currentOrigin);
+      }
+      window.location.href = DODO_PAYMENT_LINK;
+    }
+
+    async function startScan(autoLicenseKey = '') {
+      hideError();
+      const rawUrl = document.getElementById('urlInput').value.trim();
+      if (!rawUrl) return showError('Please enter a valid domain.');
+
+      const btn = document.getElementById('scanBtn');
+      btn.disabled = true;
+      btn.textContent = 'Scanning...';
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/scan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: rawUrl }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Scan failed');
+        }
+
+        currentOrigin = data.origin;
+        localStorage.setItem('aeo_pending_domain', currentOrigin);
+        renderResults(data);
+
+        if (autoLicenseKey) {
+          document.getElementById('licenseInput').value = autoLicenseKey;
+          await unlockBundle(autoLicenseKey);
+        }
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Audit Site Free';
+      }
+    }
+
+    const ROLE_LABELS = { search: 'AI search / answers', user: 'User-triggered fetch', training: 'Model training' };
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function renderResults(data) {
+      document.getElementById('resultsArea').style.display = 'block';
+      document.getElementById('unlockedBox').style.display = 'none';
+      document.getElementById('paywallBox').style.display = 'block';
+
+      const score = Math.max(0, Math.min(100, Number(data.score) || 0));
+      const projected = Math.max(score, Math.min(100, Number(data.projectedScore) || score));
+      const scoreColor = score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+
+      const scoreEl = document.getElementById('scoreVal');
+      scoreEl.textContent = `${score}/100`;
+      scoreEl.style.color = scoreColor;
+
+      const bar = document.getElementById('scoreBar');
+      const proj = document.getElementById('projBar');
+      bar.style.background = scoreColor;
+      bar.style.width = '0';
+      proj.style.width = '0';
+      requestAnimationFrame(() => {
+        proj.style.width = `${projected}%`;
+        bar.style.width = `${score}%`;
+      });
+
+      const note = document.getElementById('projNote');
+      note.textContent = projected > score
+        ? `Estimated ${projected}/100 after publishing the Fix Kit (estimate from AEO Radar's rubric, not a guarantee).`
+        : '';
+
+      document.getElementById('scannedDomain').textContent = data.origin;
+
+      const badge = document.getElementById('gradeBadge');
+      badge.textContent = data.grade;
+      const good = score >= 80;
+      const mid = score >= 50 && score < 80;
+      badge.style.background = good ? 'rgba(16,185,129,0.15)' : mid ? 'rgba(217,119,6,0.15)' : 'rgba(239,68,68,0.15)';
+      badge.style.color = good ? 'var(--green)' : mid ? 'var(--amber)' : 'var(--red)';
+
+      const grid = document.getElementById('checksGrid');
+      grid.innerHTML = '';
+
+      Object.values(data.checks).forEach((item) => {
+        const status = item.status || (item.passed ? 'pass' : 'fail');
+        const card = el('div', `check-item ${status}`);
+
+        const title = el('div', 'check-title');
+        const icon = status === 'pass' ? '✅' : status === 'warn' ? '⚠️' : '❌';
+        title.appendChild(el('span', '', `${icon} ${item.label}`));
+        if (typeof item.weight === 'number') {
+          title.appendChild(el('span', 'check-pts', `${item.earned}/${item.weight}`));
+        }
+
+        card.appendChild(title);
+        card.appendChild(el('div', 'check-desc', item.detail));
+        grid.appendChild(card);
+      });
+
+      const botsCard = document.getElementById('botsCard');
+      const botsBody = document.getElementById('botsBody');
+      botsBody.innerHTML = '';
+      if (Array.isArray(data.bots) && data.bots.length) {
+        data.bots.forEach((b) => {
+          const tr = document.createElement('tr');
+          tr.appendChild(el('td', '', b.name));
+          tr.appendChild(el('td', '', b.vendor));
+          tr.appendChild(el('td', '', ROLE_LABELS[b.role] || b.role));
+          const td = document.createElement('td');
+          td.appendChild(el('span', `pill ${b.allowed ? 'ok' : 'no'}`, b.allowed ? 'Allowed' : 'Blocked'));
+          tr.appendChild(td);
+          botsBody.appendChild(tr);
+        });
+        botsCard.style.display = 'block';
+      } else {
+        botsCard.style.display = 'none';
+      }
+
+      const fixesCard = document.getElementById('fixesCard');
+      const fixList = document.getElementById('fixList');
+      fixList.innerHTML = '';
+      if (Array.isArray(data.fixes) && data.fixes.length) {
+        data.fixes.forEach((f) => {
+          const li = el('li', 'fix');
+          li.appendChild(el('div', 'fix-pts', `+${f.points}`));
+          const body = el('div', 'fix-body');
+          const t = el('div', 'fix-title', f.title);
+          t.appendChild(el('span', `tag ${f.severity}`, String(f.severity).toUpperCase()));
+          if (f.kit) t.appendChild(el('span', 'tag kit', 'IN FIX KIT'));
+          body.appendChild(t);
+          body.appendChild(el('div', 'fix-how', f.how));
+          li.appendChild(body);
+          fixList.appendChild(li);
+        });
+        fixesCard.style.display = 'block';
+      } else {
+        fixesCard.style.display = 'none';
+      }
+
+      document.getElementById('previewCode').textContent = data.previewLlmsTxt;
+      document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function unlockBundle(passedKey = '') {
+      hideError();
+      const key = (passedKey || document.getElementById('licenseInput').value).trim();
+      if (!key) return showError('Please paste your Dodo Payments license key.');
+
+      if (!currentOrigin) {
+        const savedDomain = localStorage.getItem('aeo_pending_domain') || document.getElementById('urlInput').value.trim();
+        if (savedDomain) {
+          document.getElementById('urlInput').value = savedDomain;
+          return startScan(key);
+        }
+        return showError('Please enter your domain above and audit it first before unlocking.');
+      }
+
+      const unlockBtn = document.getElementById('unlockBtn');
+      unlockBtn.disabled = true;
+      unlockBtn.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/unlock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: currentOrigin, licenseKey: key }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'License verification failed');
+
+        localStorage.setItem('aeo_license_key', key);
+        hideStatus();
+        document.getElementById('paywallBox').style.display = 'none';
+        document.getElementById('unlockedBox').style.display = 'block';
+        document.getElementById('fullLlms').textContent = data.llmsTxt;
+        document.getElementById('fullSchema').textContent = data.jsonLdSchema;
+        document.getElementById('fullRobots').textContent = data.robotsSnippet;
+        document.getElementById('fullHead').textContent = data.headSnippet || '';
+        document.getElementById('fullReport').textContent = data.report || '';
+
+        const sitemapItem = document.getElementById('sitemapItem');
+        if (data.sitemapXml) {
+          document.getElementById('fullSitemap').textContent = data.sitemapXml;
+          sitemapItem.style.display = 'block';
+        } else {
+          sitemapItem.style.display = 'none';
+        }
+
+        document.getElementById('kitSummary').textContent = data.projectedScore > data.score
+          ? `Current score ${data.score}/100. Estimated ${data.projectedScore}/100 once these files are published.`
+          : `Current score ${data.score}/100.`;
+        onKitShown('paid');
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        unlockBtn.disabled = false;
+        unlockBtn.textContent = 'Unlock Files';
+      }
+    }
+
+    async function copyText(elementId, btn) {
+      const text = document.getElementById(elementId).textContent;
+      try { await navigator.clipboard.writeText(text); } catch (e) {}
+      if (btn) {
+        const old = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = old; }, 1500);
+      }
+    }
+
+    function downloadText(elementId, filename, mime) {
+      const text = document.getElementById(elementId).textContent;
+      const blob = new Blob([text], { type: `${mime};charset=utf-8` });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    let feedbackKind = 'visitor';
+    let fbRating = 0;
+
+    function fillKit(data) {
+      hideStatus();
+      document.getElementById('paywallBox').style.display = 'none';
+      document.getElementById('unlockedBox').style.display = 'block';
+      document.getElementById('fullLlms').textContent = data.llmsTxt;
+      document.getElementById('fullSchema').textContent = data.jsonLdSchema;
+      document.getElementById('fullRobots').textContent = data.robotsSnippet;
+      document.getElementById('fullHead').textContent = data.headSnippet || '';
+      document.getElementById('fullReport').textContent = data.report || '';
+      const sitemapItem = document.getElementById('sitemapItem');
+      if (data.sitemapXml) {
+        document.getElementById('fullSitemap').textContent = data.sitemapXml;
+        sitemapItem.style.display = 'block';
+      } else {
+        sitemapItem.style.display = 'none';
+      }
+      document.getElementById('kitSummary').textContent = 'Free tester access. ' + (data.projectedScore > data.score
+        ? `Current score ${data.score}/100. Estimated ${data.projectedScore}/100 once these files are published.`
+        : `Current score ${data.score}/100.`);
+    }
+
+    function onKitShown(kind) {
+      feedbackKind = kind;
+      document.getElementById('feedback').style.display = 'block';
+    }
+
+    async function loadStatus() {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+        const data = await res.json();
+        const f = data && data.free;
+        const banner = document.getElementById('freeBanner');
+        const box = document.getElementById('testerBox');
+        if (!f || !f.enabled) { banner.style.display = 'none'; box.style.display = 'none'; return; }
+        if (f.left > 0) {
+          banner.textContent = `🎁 Free tester access: ${f.left} of ${f.total} spots left. Scan your site, then get the full Fix Kit free in return for honest feedback.`;
+          document.getElementById('testerLeft').textContent = `${f.left} of ${f.total} free spots left.`;
+          box.style.display = 'flex';
+        } else {
+          banner.textContent = 'Free tester spots are full. The audit is still free; the Fix Kit is $29.';
+          box.style.display = 'none';
+        }
+        banner.style.display = 'block';
+      } catch (e) { /* banner stays hidden */ }
+    }
+
+    async function claimFree() {
+      hideError();
+      if (!currentOrigin) return showError('Please audit your domain first.');
+      const btn = document.getElementById('claimBtn');
+      btn.disabled = true;
+      btn.textContent = 'Preparing your kit...';
+      try {
+        const res = await fetch(`${WORKER_URL}/api/claim`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: currentOrigin }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if (res.status === 410) loadStatus();
+          throw new Error(data.error || 'Could not claim a free spot.');
+        }
+        fillKit(data);
+        onKitShown('tester');
+        loadStatus();
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Get free kit';
+      }
+    }
+
+    function setRating(v) {
+      fbRating = v;
+      document.querySelectorAll('#stars button').forEach((b) => {
+        const on = Number(b.dataset.v) <= v;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
+    function openFeedback(e) {
+      if (e) e.preventDefault();
+      const card = document.getElementById('feedback');
+      card.style.display = 'block';
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function submitFeedback() {
+      const status = document.getElementById('fbStatus');
+      if (!fbRating) { status.textContent = 'Please choose a star rating first.'; return; }
+      const btn = document.getElementById('fbSubmit');
+      btn.disabled = true;
+      status.textContent = 'Sending...';
+      try {
+        const res = await fetch(`${WORKER_URL}/api/feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: fbRating,
+            text: document.getElementById('fbText').value,
+            email: document.getElementById('fbEmail').value,
+            consent: document.getElementById('fbConsent').checked,
+            domain: currentOrigin,
+            kind: feedbackKind,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not send feedback.');
+        document.getElementById('fbForm').style.display = 'none';
+        document.getElementById('fbThanks').style.display = 'block';
+      } catch (err) {
+        status.textContent = err.message;
+        btn.disabled = false;
+      }
+    }
+
+    document.querySelectorAll('#stars button').forEach((b) => b.addEventListener('click', () => setRating(Number(b.dataset.v))));
+
+    // Auto-detect license_key returned in URL after Dodo Payments checkout
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const returnedKey = params.get('license_key');
+      const savedKey = localStorage.getItem('aeo_license_key');
+      const savedDomain = localStorage.getItem('aeo_pending_domain');
+
+      loadStatus();
+      document.getElementById('urlInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') startScan();
+      });
+
+      if (returnedKey) {
+        // Clean URL bar while keeping key ready
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showStatus('🎉 Payment successful! Activating your license key...');
+        if (savedDomain) {
+          document.getElementById('urlInput').value = savedDomain;
+          startScan(returnedKey);
+        } else {
+          document.getElementById('licenseInput').value = returnedKey;
+          showStatus('🎉 Payment successful! Enter your website URL above and click "Audit Site Free" to unlock your files.');
+        }
+      } else if (savedKey) {
+        document.getElementById('licenseInput').value = savedKey;
+      }
+    });
+  </script>
+  <script src="/chat.js" defer></script>
+</body>
+</html>

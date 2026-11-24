@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Dashboard — AEO Radar</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root { --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --accent:#2563eb; --soft:#f8fafc; --green:#059669; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--text); background:#fff; line-height:1.55; -webkit-font-smoothing:antialiased; }
+    main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 26px; letter-spacing: -0.02em; margin: 6px 0 4px; }
+    h2 { font-size: 17px; margin: 30px 0 10px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .login { display:flex; gap:8px; margin: 18px 0; flex-wrap: wrap; }
+    input { flex:1; min-width: 220px; border:1px solid var(--border); border-radius:11px; padding:11px 14px; font-size:15px; font-family:inherit; }
+    button { background:var(--accent); color:#fff; border:none; border-radius:11px; padding:11px 20px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+    button:disabled { opacity:.6; }
+    .err { background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; padding:10px 14px; border-radius:11px; font-size:14px; display:none; margin-bottom:14px; }
+    .tiles { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+    .tile { border:1px solid var(--border); border-radius:14px; padding:14px 16px; background:var(--soft); }
+    .tile .n { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height:1.1; }
+    .tile .l { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .tile.hl { background:#ecfdf5; border-color:#a7f3d0; }
+    table { width:100%; border-collapse: collapse; font-size: 14px; display:block; overflow-x:auto; }
+    th, td { text-align:left; padding: 8px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .fb { border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px; }
+    .fb .top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+    .fb .stars { color:#f59e0b; letter-spacing:2px; font-size:15px; }
+    .fb p { margin: 6px 0 0; font-size: 14.5px; white-space: pre-wrap; word-wrap: break-word; }
+    .pill { display:inline-block; font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:999px; background:#eff6ff; color:#1d4ed8; margin-left:6px; }
+    .pill.ok { background:#ecfdf5; color:#047857; }
+    #dash { display:none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Dashboard</h1>
+  <p class="muted">Private. Enter your admin token (the ADMIN_TOKEN secret on the Worker).</p>
+  <div class="login">
+    <label for="token" style="position:absolute;left:-9999px;">Admin token</label>
+    <input id="token" type="password" autocomplete="off" placeholder="Admin token" />
+    <button id="go" type="button">Open</button>
+  </div>
+  <div class="err" id="err" role="alert"></div>
+
+  <div id="dash">
+    <p class="muted" id="updated"></p>
+
+    <div class="tiles" id="tiles"></div>
+
+    <h2>Per day (India time)</h2>
+    <table>
+      <thead><tr><th>Day</th><th>Visitors</th><th>Scans</th><th>Free claims</th><th>Paid unlocks</th><th>Chat msgs</th></tr></thead>
+      <tbody id="days"></tbody>
+    </table>
+    <p class="muted" style="margin-top:8px;">Visitors = unique people per day (the same person on two days counts twice). Counts are approximate: Cloudflare KV is eventually consistent and the free plan allows about 1,000 writes a day. For exact traffic, also enable Cloudflare Web Analytics.</p>
+
+    <h2>Latest feedback</h2>
+    <div id="fb"></div>
+  </div>
+</main>
+
+<script>
+  const WORKER_URL = 'https://aeohelper-api.aeohelper.workers.dev';
+  const $ = (id) => document.getElementById(id);
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function tile(num, label, hl) {
+    const t = el('div', 'tile' + (hl ? ' hl' : ''));
+    t.appendChild(el('div', 'n', String(num)));
+    t.appendChild(el('div', 'l', label));
+    return t;
+  }
+
+  function showError(msg) {
+    const e = $('err');
+    e.textContent = msg;
+    e.style.display = msg ? 'block' : 'none';
+  }
+
+  function render(d) {
+    $('dash').style.display = 'block';
+    const today = d.days[0] || {};
+    const tiles = $('tiles');
+    tiles.textContent = '';
+    const slots = d.slots.enabled ? `${d.slots.used}/${d.slots.total}` : 'off';
+    tiles.appendChild(tile(today.uniques || 0, 'Visitors today', true));
+    tiles.appendChild(tile(d.totals.uniques, `Visitors, last ${d.statsDays} days`));
+    tiles.appendChild(tile(d.totals.scans, `Scans, last ${d.statsDays} days`));
+    tiles.appendChild(tile(slots, 'Free spots used', true));
+    tiles.appendChild(tile(d.totals.unlocks, 'Paid unlocks'));
+    tiles.appendChild(tile(d.totals.chats, 'Chat messages'));
+    tiles.appendChild(tile(d.feedback.count, 'Feedback received'));
+    tiles.appendChild(tile(d.feedback.count ? d.feedback.avg + ' / 5' : '-', 'Average rating'));
+
+    const body = $('days');
+    body.textContent = '';
+    d.days.forEach((r) => {
+      const tr = document.createElement('tr');
+      [r.day, r.uniques, r.scans, r.claims, r.unlocks, r.chats].forEach((v) => tr.appendChild(el('td', '', String(v))));
+      body.appendChild(tr);
+    });
+
+    const fb = $('fb');
+    fb.textContent = '';
+    if (!d.feedback.items.length) fb.appendChild(el('p', 'muted', 'No feedback yet.'));
+    d.feedback.items.forEach((f) => {
+      const card = el('div', 'fb');
+      const top = el('div', 'top');
+      const left = el('span');
+      left.appendChild(el('span', 'stars', '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating)));
+      left.appendChild(el('span', 'pill', f.kind));
+      if (f.consent) left.appendChild(el('span', 'pill ok', 'OK to quote'));
+      top.appendChild(left);
+      top.appendChild(el('span', '', [f.domain, f.email, new Date(f.ts).toLocaleString()].filter(Boolean).join(' · ')));
+      card.appendChild(top);
+      if (f.text) card.appendChild(el('p', '', f.text));
+      fb.appendChild(card);
+    });
+    $('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  }
+
+  async function load() {
+    const token = $('token').value.trim();
+    if (!token) return showError('Enter the admin token.');
+    showError('');
+    $('go').disabled = true;
+    try {
+      const res = await fetch(WORKER_URL + '/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      try { sessionStorage.setItem('aeo_admin', token); } catch (e) {}
+      render(data);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      $('go').disabled = false;
+    }
+  }
+
+  $('go').addEventListener('click', load);
+  $('token').addEventListener('keydown', (e) => { if (e.key === 'Enter') load(); });
+  try {
+    const saved = sessionStorage.getItem('aeo_admin');
+    if (saved) { $('token').value = saved; load(); }
+  } catch (e) {}
+</script>
+</body>
+</html>
